@@ -78,15 +78,19 @@ namespace openAiAPI
             };
 
 
-            Response<ChatCompletions> response = await _openAIClient.GetChatCompletionsAsync(chatOptions);
-
             try
             {
+                Response<ChatCompletions> response = await _openAIClient.GetChatCompletionsAsync(chatOptions);
                 ChatResponseMessage responseMessage = response.Value.Choices.FirstOrDefault().Message;
 
                 return new OkObjectResult(responseMessage.Content);
             }
-            catch { return new BadRequestResult(); }
+            catch (Exception e)
+            { 
+                var message = e.Message;    
+                var errorResponse = message.Contains("prompt triggering") ? message.Substring(0, message.IndexOf("https://go.microsoft.com/fwlink/?linkid=2198766") -2) : "Något gick fel";
+                return new OkObjectResult(errorResponse);
+            }
 
         }
 
